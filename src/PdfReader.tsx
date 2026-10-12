@@ -30,6 +30,47 @@ export default function PdfReader({ paper, settings, fields, onPage, onExcerpt, 
   const root = useRef<HTMLDivElement>(null); const scroll = useRef<HTMLDivElement>(null); const pdfRef = useRef<PDFDocumentProxy | null>(null);
   const [data, setData] = useState<Blob | null>(null); const [error, setError] = useState(''); const [count, setCount] = useState(0);
   const [page, setPage] = useState(paper.page); const [pageInput, setPageInput] = useState(String(paper.page)); const [zoom, setZoom] = useState(1); const [width, setWidth] = useState(700); const [ratio, setRatio] = useState(0.707);
+  const zoomRef = useRef(zoom);
+  const zoomAnchor = useRef<{ element: HTMLElement; x: number; y: number; clientX: number; clientY: number } | null>(null);
+  function changeZoom(value: number, point?: Point) {
+    const next = Math.round(Math.max(0.5, Math.min(2.5, value)) * 1000) / 1000;
+    if (next === zoomRef.current) return;
+    zoomAnchor.current = null;
+    const container = scroll.current;
+    if (container) {
+      const bounds = container.getBoundingClientRect();
+      const clientX = point?.x ?? bounds.left + container.clientWidth / 2;
+      const clientY = point?.y ?? bounds.top + container.clientHeight / 2;
+      const elements = [...container.querySelectorAll<HTMLElement>('.pdf-page')];
+      const element = elements.find(el => { const box = el.getBoundingClientRect(); return clientY >= box.top && clientY <= box.bottom; });
+      if (element) { const box = element.getBoundingClientRect(); if (box.width && box.height) zoomAnchor.current = { element, x: (clientX - box.left) / box.width, y: (clientY - box.top) / box.height, clientX, clientY }; }
+    }
+    zoomRef.current = next; setZoom(next);
+  }
+  useEffect(() => {
+    if (!visible) return;
+    const container = scroll.current; if (!container) return;
+    const wheel = (event: WheelEvent) => {
+      if (!event.ctrlKey) return;
+      event.preventDefault(); event.stopPropagation();
+      if (!Number.isFinite(event.deltaY) || event.deltaY === 0) return;
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? Math.max(100, container.clientHeight) : 1;
+      const delta = event.deltaY * unit;
+      changeZoom(zoomRef.current - Math.sign(delta) * Math.min(0.1, Math.abs(delta) / 1000), { x: event.clientX, y: event.clientY });
+    };
+    // A non-passive native listener lets Ctrl+wheel cancel WebView's whole-window zoom.
+    container.addEventListener('wheel', wheel, { passive: false });
+    return () => container.removeEventListener('wheel', wheel);
+  }, [visible]);
+  useEffect(() => {
+    if (!visible) { zoomAnchor.current = null; return; }
+    const anchor = zoomAnchor.current; if (!anchor) return;
+    const frame = requestAnimationFrame(() => {
+      const container = scroll.current;
+      if (container && anchor.element.isConnected && zoomAnchor.current === anchor) { const box = anchor.element.getBoundingClientRect(); container.scrollLeft += box.left + anchor.x * box.width - anchor.clientX; container.scrollTop += box.top + anchor.y * box.height - anchor.clientY; zoomAnchor.current = null; }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [zoom, visible]);
   const [query, setQuery] = useState(''); const [texts, setTexts] = useState<string[]>([]); const [indexing, setIndexing] = useState(false); const [outline, setOutline] = useState<{ title: string; page: number }[]>([]);
   const [selection, setSelection] = useState<Selection | null>(null); const [translation, setTranslation] = useState(''); const [translating, setTranslating] = useState(false); const [translateError, setTranslateError] = useState('');
   const popup = useRef<HTMLDivElement>(null);
@@ -107,7 +148,7 @@ export default function PdfReader({ paper, settings, fields, onPage, onExcerpt, 
   return <div className="reader" ref={root} hidden={!visible}>
     <div className="pdf-tools">
       <div className="pdf-page-control"><button title="上一页" disabled={page <= 1} onClick={() => goTo(page - 1)}><Icon name="chevron" style={{ transform: 'rotate(180deg)' }} size={15} /></button><input aria-label="PDF 页码" value={pageInput} onChange={e => setPageInput(e.target.value)} onBlur={() => goTo(Number(pageInput) || 1)} onKeyDown={e => { if (e.key === 'Enter') goTo(Number(pageInput) || 1); }} /><span>/ {count || '—'}</span><button title="下一页" disabled={page >= count} onClick={() => goTo(page + 1)}><Icon name="chevron" size={15} /></button></div>
-      <span className="tool-separator" /><button title="缩小" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}>−</button><button className="zoom" title="恢复适合宽度" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button><button title="放大" onClick={() => setZoom(z => Math.min(2.5, z + 0.1))}>＋</button>
+      <span className="tool-separator" /><button title="缩小" onClick={() => changeZoom(zoomRef.current - 0.1)}>−</button><button className="zoom" title="恢复适合宽度 · Ctrl+滚轮缩放" onClick={() => changeZoom(1)}>{Math.round(zoom * 100)}%</button><button title="放大" onClick={() => changeZoom(zoomRef.current + 0.1)}>＋</button>
       {outline.length > 0 && <select aria-label="PDF 目录" className="outline" value="" onChange={e => goTo(Number(e.target.value))}><option value="">目录</option>{outline.map((o, i) => <option key={i} value={o.page}>{o.title}</option>)}</select>}
       <div className="pdf-search"><Icon name="search" size={15} /><input aria-label="搜索原文" placeholder="搜索原文" value={query} onChange={e => setQuery(e.target.value)} />{query && <button title="下一个匹配页面" onClick={() => goTo(matches.find(n => n > page) || matches[0] || page)}>{indexing ? '…' : `${matches.length} 页`} <Icon name="chevron" size={12} /></button>}</div>
     </div>

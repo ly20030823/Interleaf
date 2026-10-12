@@ -60,6 +60,44 @@ beforeEach(() => {
 afterEach(() => { cleanup(); window.getSelection()?.removeAllRanges(); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('reading selection translation', () => {
+  it('zooms only Ctrl+wheel in the PDF viewport and shares button limits', async () => {
+    const result = await openReader();
+    const viewport = result.container.querySelector('.pdf-scroll')!;
+    const ordinary = new WheelEvent('wheel', { deltaY: -100, bubbles: true, cancelable: true });
+    fireEvent(viewport, ordinary);
+    expect(ordinary.defaultPrevented).toBe(false);
+    expect(screen.getByText('100%')).toBeTruthy();
+    const zoomIn = new WheelEvent('wheel', { ctrlKey: true, deltaY: -100, clientX: 250, clientY: 300, bubbles: true, cancelable: true });
+    fireEvent(viewport, zoomIn);
+    expect(zoomIn.defaultPrevented).toBe(true);
+    expect(screen.getByText('110%')).toBeTruthy();
+    fireEvent.click(screen.getByTitle('放大'));
+    expect(screen.getByText('120%')).toBeTruthy();
+    for (let i = 0; i < 30; i++) fireEvent.wheel(viewport, { ctrlKey: true, deltaY: -100 });
+    expect(screen.getByText('250%')).toBeTruthy();
+    for (let i = 0; i < 30; i++) fireEvent.wheel(viewport, { ctrlKey: true, deltaY: 100 });
+    expect(screen.getByText('50%')).toBeTruthy();
+    fireEvent.click(screen.getByTitle('恢复适合宽度 · Ctrl+滚轮缩放'));
+    expect(screen.getByText('100%')).toBeTruthy();
+    fireEvent.wheel(result.container.querySelector('.pdf-tools')!, { ctrlKey: true, deltaY: -100 });
+    expect(screen.getByText('100%')).toBeTruthy();
+  });
+
+  it('handles small trackpad deltas and removes the wheel listener while hidden', async () => {
+    const result = await openReader();
+    const viewport = result.container.querySelector('.pdf-scroll')!;
+    fireEvent.wheel(viewport, { ctrlKey: true, deltaY: -10 });
+    expect(screen.getByText('101%')).toBeTruthy();
+    result.rerender(<PdfReader {...props} visible={false} />);
+    const hiddenWheel = new WheelEvent('wheel', { ctrlKey: true, deltaY: -100, cancelable: true });
+    fireEvent(viewport, hiddenWheel);
+    expect(hiddenWheel.defaultPrevented).toBe(false);
+    result.rerender(<PdfReader {...props} visible />);
+    expect(screen.getByText('101%')).toBeTruthy();
+    fireEvent.wheel(viewport, { ctrlKey: true, deltaY: 0 });
+    expect(screen.getByText('101%')).toBeTruthy();
+  });
+
   it('translates after pointer selection finishes, deduplicating selection events', async () => {
     await openReader();
     fireEvent.pointerDown(screen.getByTestId('first'), { button: 0, pointerId: 1 });

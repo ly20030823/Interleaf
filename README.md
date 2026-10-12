@@ -23,14 +23,14 @@
 
 ## 开始使用
 
-从 [Releases](https://github.com/ly20030823/Interleaf/releases) 下载 Windows 版本：免安装版 `Interleaf.exe`，或安装包 `Interleaf_0.1.3_x64-setup.exe`。运行需要 Windows 的 WebView2 环境。
+从 [Releases](https://github.com/ly20030823/Interleaf/releases) 下载 Windows 版本：免安装版 `Interleaf.exe`，或安装包 `Interleaf_0.1.4_x64-setup.exe`。运行需要 Windows 的 WebView2 环境。
 
 1. 点击「导入论文」，选择 PDF。
 2. 补充标题、作者等信息；右侧读原文，左侧填写自己的理解。
 3. 选中文字，翻译、保存摘录或高亮。
 4. 建立分类，标记阅读状态，在表格中回顾并导出。
 
-`Ctrl+S` 立即保存，`Alt+T` 翻译选区，`Esc` 关闭翻译浮窗。表格中双击论文即可进入阅读。
+`Ctrl+S` 立即保存，`Alt+T` 翻译选区，`Esc` 关闭翻译浮窗。鼠标放在 PDF 阅读区时，`Ctrl+滚轮` 缩放原文（50%～250%），并与顶部缩放按钮同步；点击百分比恢复适合宽度。表格中双击论文即可进入阅读。
 
 ### 翻译
 
