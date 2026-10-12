@@ -1,0 +1,14 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+.test-library/
+test-results/
+*.log
+release/*.exe
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.paperjournal

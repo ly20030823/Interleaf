@@ -1,0 +1,10 @@
+import { describe, expect, it } from 'vitest';
+import { descendantIds, emptyLibrary, exportCsv, exportMarkdown, newPaper, normalizeSelection, validateLibrary } from './domain';
+
+describe('reading journal data integrity', () => {
+  it('repairs selection whitespace and English line-break hyphenation', () => { expect(normalizeSelection('An anom-\naly\t detection\n method')).toBe('An anomaly detection method'); });
+  it('includes nested folders without looping', () => { expect([...descendantIds([{ id: 'a', name: 'A', parentId: null }, { id: 'b', name: 'B', parentId: 'a' }, { id: 'c', name: 'C', parentId: 'b' }], 'a')]).toEqual(['a', 'b', 'c']); });
+  it('rejects cyclic folders and traversal file keys before restoring', () => { const l = emptyLibrary(); l.folders = [{ id: 'a', name: 'A', parentId: 'b' }, { id: 'b', name: 'B', parentId: 'a' }]; expect(() => validateLibrary(l)).toThrow('循环'); const p = newPaper({ fileKey: '../secret', fileName: 'paper.pdf' }); expect(() => validateLibrary({ ...emptyLibrary(), papers: [p] })).toThrow(); });
+  it('exports all custom notes and neutralizes spreadsheet formulas', () => { const l = emptyLibrary(); const p = newPaper({ fileKey: 'a'.repeat(64), fileName: 'paper.pdf' }); p.title = '=HYPERLINK("x")'; p.notes.question = '问题,\n第二行'; l.fields.push({ id: 'custom', label: '自定义列' }); p.notes.custom = '自定义内容'; const csv = exportCsv([p], l); expect(csv).toContain("'=HYPERLINK"); expect(csv).toContain('问题,\n第二行'); expect(csv).toContain('自定义列'); expect(csv).toContain('自定义内容'); });
+  it('keeps translated excerpts and source pages in Markdown exports', () => { const l = emptyLibrary(); const p = newPaper({ fileKey: 'a'.repeat(64), fileName: 'paper.pdf' }); p.excerpts.push({ id: 'a', text: 'A method', translation: '一种方法', page: 3, rects: [], fieldId: 'method', kind: 'quote', createdAt: new Date().toISOString() }); const text = exportMarkdown(p, l); expect(text).toContain('一种方法'); expect(text).toContain('PDF 第 3 页'); expect(validateLibrary({ ...l, papers: [p] })).toBeTruthy(); });
+});
