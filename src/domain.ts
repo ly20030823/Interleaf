@@ -8,7 +8,7 @@ export interface Paper {
   status: Status; folderIds: string[]; tags: string; notes: Record<string, string>; excerpts: Excerpt[];
   addedAt: string; updatedAt: string; readAt: string | null; page: number;
 }
-export interface Settings { googleHost: 'google' | 'googleapi'; autoTranslate: boolean; targetLanguage: 'zh-CN' | 'zh-TW'; proxy: string }
+export interface Settings { googleHost: 'google' | 'googleapi'; autoTranslate: boolean; targetLanguage: 'zh-CN' | 'zh-TW'; proxy: string; translationModeVersion?: 1 }
 export interface Library { version: 1; papers: Paper[]; folders: Folder[]; fields: NoteField[]; settings: Settings }
 export const DEFAULT_FIELDS: NoteField[] = [
   { id: 'question', label: '研究问题' }, { id: 'contribution', label: '主要贡献' },
@@ -16,7 +16,7 @@ export const DEFAULT_FIELDS: NoteField[] = [
   { id: 'limitations', label: '局限与不足' }, { id: 'ideas', label: '对我的启发' }, { id: 'free', label: '自由笔记' },
 ];
 export const STATUS_LABEL: Record<Status, string> = { unread: '待读', reading: '阅读中', read: '已读' };
-export function emptyLibrary(): Library { return { version: 1, papers: [], folders: [], fields: DEFAULT_FIELDS.map(f => ({ ...f })), settings: { googleHost: 'googleapi', autoTranslate: false, targetLanguage: 'zh-CN', proxy: '' } }; }
+export function emptyLibrary(): Library { return { version: 1, papers: [], folders: [], fields: DEFAULT_FIELDS.map(f => ({ ...f })), settings: { googleHost: 'googleapi', autoTranslate: true, targetLanguage: 'zh-CN', proxy: '', translationModeVersion: 1 } }; }
 export function newPaper(file: { fileKey: string; fileName: string }): Paper {
   const now = new Date().toISOString();
   return { id: crypto.randomUUID(), ...file, title: file.fileName.replace(/\.pdf$/i, ''), authors: '', year: '', venue: '', status: 'unread', folderIds: [], tags: '', notes: {}, excerpts: [], addedAt: now, updatedAt: now, readAt: null, page: 1 };
@@ -48,5 +48,5 @@ export function validateLibrary(input: unknown): Library {
     for (const e of p.excerpts) if (!e || ![e.id, e.text, e.fieldId, e.createdAt].every(str) || (e.translation !== undefined && !str(e.translation)) || !['quote', 'highlight'].includes(e.kind) || !Number.isInteger(e.page) || e.page < 1 || !Array.isArray(e.rects) || e.rects.some(r => !r || !Number.isInteger(r.page) || r.page < 1 || ![r.x, r.y, r.w, r.h].every(n => Number.isFinite(n) && n >= 0 && n <= 1))) throw new Error('摘录位置格式不正确。');
   }
   if (!['google', 'googleapi'].includes(x.settings.googleHost) || !['zh-CN', 'zh-TW'].includes(x.settings.targetLanguage) || typeof x.settings.autoTranslate !== 'boolean' || !str(x.settings.proxy)) throw new Error('翻译设置格式不正确。');
-  return x;
+  return { ...x, settings: { ...x.settings, autoTranslate: x.settings.translationModeVersion === 1 ? x.settings.autoTranslate : true, translationModeVersion: 1 } };
 }

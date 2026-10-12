@@ -7,5 +7,5 @@ export default defineConfig({
     '/translation/googleapi': { target: 'https://translate.googleapis.com', changeOrigin: true, rewrite: path => path.replace('/translation/googleapi', '/translate_a/single') },
     '/translation/google': { target: 'https://translate.google.com', changeOrigin: true, rewrite: path => path.replace('/translation/google', '/translate_a/single') },
   } },
-  test: { include: ['src/**/*.test.ts'] },
+  test: { include: ['src/**/*.test.{ts,tsx}'] },
 });
