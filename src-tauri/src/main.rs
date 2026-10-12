@@ -73,7 +73,7 @@ async fn translate_google(store: State<'_, Store>, text: String, settings: Setti
   if !matches!(settings.target_language.as_str(), "zh-CN"|"zh-TW") { return Err("无效的目标语言。".into()); }
   let key = digest(format!("{host}|{}|{text}", settings.target_language).as_bytes());
   { let db = store.db.lock().map_err(err)?; if let Ok(cached) = db.query_row("SELECT text FROM translations WHERE key=?1", params![key], |row| row.get::<_, String>(0)) { return Ok(cached); } }
-  let mut builder = reqwest::Client::builder().timeout(Duration::from_secs(20)).user_agent("Mozilla/5.0 Interleaf/0.1.2");
+  let mut builder = reqwest::Client::builder().timeout(Duration::from_secs(20)).user_agent("Mozilla/5.0 Interleaf/0.1.3");
   if !settings.proxy.trim().is_empty() { builder = builder.proxy(reqwest::Proxy::all(&settings.proxy).map_err(|_| "代理地址格式不正确。")?); }
   let response = builder.build().map_err(err)?.get(host).query(&[("client", "gtx"), ("sl", "auto"), ("tl", settings.target_language.as_str()), ("dt", "t"), ("q", text.as_str())]).send().await.map_err(|e| format!("无法连接 Google，请检查网络或在设置中填写代理地址。{e}"))?;
   if !response.status().is_success() { return Err(format!("Google 返回 {}，请稍后重试或切换翻译源。", response.status())); }

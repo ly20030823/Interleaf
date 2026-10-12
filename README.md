@@ -23,7 +23,7 @@
 
 ## 开始使用
 
-从 [Releases](https://github.com/ly20030823/Interleaf/releases) 下载 Windows 版本：免安装版 `Interleaf.exe`，或安装包 `Interleaf_0.1.2_x64-setup.exe`。运行需要 Windows 的 WebView2 环境。
+从 [Releases](https://github.com/ly20030823/Interleaf/releases) 下载 Windows 版本：免安装版 `Interleaf.exe`，或安装包 `Interleaf_0.1.3_x64-setup.exe`。运行需要 Windows 的 WebView2 环境。
 
 1. 点击「导入论文」，选择 PDF。
 2. 补充标题、作者等信息；右侧读原文，左侧填写自己的理解。
