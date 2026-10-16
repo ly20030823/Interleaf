@@ -12,7 +12,7 @@
 
 ## 功能
 
-- **边读边记**：PDF 与笔记并排，可独立隐藏、恢复两侧面板，并调整分栏宽度；自定义笔记栏目，支持 Markdown 编辑和预览，自动保存。
+- **边读边记**：PDF 与笔记并排，可独立隐藏、恢复两侧面板，并调整分栏宽度；自定义笔记栏目，支持 Markdown 编辑和预览，切换按钮位于笔记栏顶部齿轮左侧，自动保存。
 - **论文表格**：按标题、作者、标签及笔记搜索，筛选阅读状态、排序，选择需要展示的笔记列。
 - **文件夹分类**：创建嵌套分类，同一篇论文可放入多个分类；支持批量归类。
 - **PDF 阅读**：连续阅读、缩放、页码跳转、目录与文本搜索，记住阅读位置。
@@ -23,7 +23,7 @@
 
 ## 开始使用
 
-从 [Releases](https://github.com/ly20030823/Interleaf/releases) 下载 Windows 版本：免安装版 `Interleaf.exe`，或安装包 `Interleaf_0.1.4_x64-setup.exe`。运行需要 Windows 的 WebView2 环境。
+从 [Releases](https://github.com/ly20030823/Interleaf/releases) 下载 Windows 版本：免安装版 `Interleaf.exe`，或安装包 `Interleaf_0.1.5_x64-setup.exe`。运行需要 Windows 的 WebView2 环境。
 
 1. 点击「导入论文」，选择 PDF。
 2. 补充标题、作者等信息；右侧读原文，左侧填写自己的理解。
