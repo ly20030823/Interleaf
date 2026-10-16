@@ -258,6 +258,10 @@ h1{font-weight:550;font-size:27px;letter-spacing:1px}
 .markdown td,.markdown th{border:1px solid #c8d3e2;padding:4px 7px}
 .markdown pre{background:#e3eaf3;padding:10px;overflow:auto;border-radius:5px}
 .markdown code{font-size:10px;background:#e3eaf3;padding:1px 3px}
+.markdown{max-width:100%;overflow-x:auto}
+.markdown .katex{font-size:1.08em;overflow-wrap:normal}
+.markdown .katex-display{max-width:100%;overflow-x:auto;overflow-y:hidden;margin:12px 0;padding:5px 0 10px}
+.markdown .katex-error{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 .modal-backdrop{position:fixed;inset:0;background:#171e284d;backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px}
 .modal{background:#f8fafc;box-shadow:0 20px 80px #18202b40;width:500px;max-width:100%;border:1px solid #d7dfe9;border-radius:15px;padding:27px 29px;max-height:90vh;overflow:auto}
 .modal-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:23px}

@@ -1,6 +1,6 @@
 {
   "name": "interleaf",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,12 +13,17 @@
   "dependencies": {
     "@tauri-apps/api": "~2.12.3",
     "@tauri-apps/plugin-dialog": "^2.7.0",
+    "katex": "^0.16.47",
     "pdfjs-dist": "5.4.296",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.5.0",
-    "remark-gfm": "^4.0.1"
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

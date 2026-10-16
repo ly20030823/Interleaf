@@ -9,6 +9,23 @@ vi.mock('./storage', () => ({ desktop: false, loadLibrary: vi.fn(), saveLibrary:
 vi.mock('./PdfReader', () => ({ default: ({ visible }: { visible: boolean }) => <div className="reader" hidden={!visible}><input aria-label="阅读状态占位" defaultValue="阅读位置" /></div> }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
+it('previews formulas while keeping the original LaTeX editable and saved verbatim', async () => {
+  const library = emptyLibrary();
+  const original = String.raw`总损失：\(\mathcal{L}=\mathcal{L}^{(DI)}+\mathcal{L}^{(AD)}+\mathcal{L}^{(RE)}\)`;
+  library.papers.push({ ...newPaper({ fileKey: 'a'.repeat(64), fileName: 'Formula example.pdf' }), status: 'reading', notes: { method: original } });
+  vi.mocked(loadLibrary).mockResolvedValue(library);
+  vi.mocked(saveLibrary).mockResolvedValue();
+  const result = render(<App />);
+  await act(async () => { await Promise.resolve(); });
+  fireEvent.click(screen.getByText('Formula example'));
+  fireEvent.click(screen.getByRole('button', { name: '预览笔记' }));
+  expect(result.container.querySelector('.katex')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: '编辑笔记' }));
+  expect((screen.getByLabelText('核心方法') as HTMLTextAreaElement).value).toBe(original);
+  await act(async () => { fireEvent.keyDown(document, { ctrlKey: true, key: 's' }); });
+  expect(vi.mocked(saveLibrary).mock.lastCall?.[0].papers[0].notes.method).toBe(original);
+});
+
 it('switches between PDF-only, notes-only and split view without losing notes or mounted state', async () => {
   const library = emptyLibrary();
   library.papers.push({ ...newPaper({ fileKey: 'a'.repeat(64), fileName: 'Panel example.pdf' }), status: 'reading' });
